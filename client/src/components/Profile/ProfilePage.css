@@ -1,0 +1,157 @@
+/* Общие стили */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f4f8; /* светлый фон */
+  margin: 0;
+  padding: 0;
+}
+
+.profile-container {
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.profile-title {
+  font-family: 'Georgia', serif;
+  font-size: 2rem;
+  color: #333333;
+  text-align: center;
+  margin-bottom: 40px;
+  font-weight: 600;
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background-color: #2196f3; /* синий цвет */
+  color: white;
+  font-size: 1.6rem;
+  padding: 20px;
+  text-align: center;
+  border-radius: 12px 12px 0 0;
+}
+
+.card-body {
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Кнопки */
+.btn-primary {
+  background-color: #2196f3;
+  border-color: #2196f3;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #1976d2;
+}
+
+.btn-success {
+  background-color: #4caf50;
+  border-color: #4caf50;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn-success:hover {
+  background-color: #388e3c;
+}
+
+.btn-secondary {
+  background-color: #9e9e9e;
+  border-color: #9e9e9e;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #616161;
+}
+
+.btn-warning {
+  background-color: #ff9800;
+  border-color: #ff9800;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn-warning:hover {
+  background-color: #f57c00;
+}
+
+/* Формы */
+.form-group label {
+  font-weight: 500;
+  color: #333333;
+}
+
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 12px 18px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #2196f3;
+  box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
+}
+
+/* Мелкие отступы */
+.mt-4 {
+  margin-top: 3rem;
+}
+
+.mt-5 {
+  margin-top: 5rem;
+}
+
+.mt-2 {
+  margin-top: 1rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Стили для блока пользователя */
+.profile-info p {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.profile-info strong {
+  color: #2196f3;
+}
+
+/* Стили для ссылок */
+a {
+  color: #2196f3;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #1976d2;
+}
