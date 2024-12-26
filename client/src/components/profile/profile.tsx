@@ -1,20 +1,16 @@
-// src/pages/ProfilePage.tsx
+
 import React, { useContext, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Button, Card, Form, Input, Typography, Descriptions, message } from "antd";
+import { Button, Card, Form, Input, Typography, Descriptions } from "antd";
 import { Context } from "../..";
-import { IUser } from "../../models/IUser";
-import AdminPanel from "./AdminPanel";
 
 const { Title } = Typography;
 
 const ProfilePage = observer(() => {
   const { store } = useContext(Context);
   const [isEditing, setIsEditing] = useState(false);
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [users, setUsers] = useState<IUser[]>([]);
 
-  // Form management
+
   const [form] = Form.useForm();
   const initialValues = {
     username: store.user.username || "",
@@ -119,19 +115,6 @@ const ProfilePage = observer(() => {
             </div>
           </>
         )}
-
-        {store.user.role === "admin" && (
-          <div className="text-center mt-4">
-            <Button
-              type="default"
-              onClick={() => setShowAdminPanel((prev) => !prev)}
-            >
-              {showAdminPanel ? "Hide Admin Panel" : "Show Admin Panel"}
-            </Button>
-          </div>
-        )}
-
-        {showAdminPanel && <AdminPanel users={users} setUsers={setUsers} />}
       </Card>
     </div>
   );

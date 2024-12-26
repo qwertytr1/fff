@@ -24,14 +24,14 @@ function Login() {
     try {
       await store.login(email, password);
       message.success("Login successful");
-      navigate("/Profile"); // Перенаправляем на панель после успешного логина
+      navigate("/Profile");
     } catch (error) {
       message.error("Login failed. Please check your credentials.");
     }
   };
 
   const handleRegistrationRedirect = () => {
-    navigate("/register"); // Перенаправляем на страницу регистрации
+    navigate("/register");
   };
 
   return (

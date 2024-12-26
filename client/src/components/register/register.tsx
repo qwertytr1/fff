@@ -56,7 +56,7 @@ function Register() {
 
   const handleRegister = useCallback(async () => {
     try {
-      await store.registration(username, email, password, language, theme, role);
+      await store.register(username, email, password, language, theme, role);
       message.success("Registration successful");
       navigate("/login");
     } catch (error) {

@@ -7,17 +7,25 @@ import { Context } from '.';
 import { observer } from 'mobx-react-lite';
 import UserService from './services/UserService';
 import { IUser } from './models/IUser';
-import ProfilePage from './components/Profile/ProfilePage';
+import ProfilePage from './components/profile/profile';
 import Register from './components/register/register';
+import SidebarMenu from './components/sideBar/sidebar';
+import AdminPanel from './components/admin/admin';
 
 
 function App() {
   return (
       <Routes>
-              <Route path="/" element={<Login />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
-    <Route path="/Profile" element={<ProfilePage />} />
+    <Route path="/" element={<SidebarMenu />}>
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/admin" element={<AdminPanel />} />
+          <Route
+            path="/statistics"
+            element={<div>Здесь будет страница статистики</div>}
+          />
+        </Route>
   </Routes>
   );
 }

@@ -44,7 +44,7 @@ export default class Store {
         }
     }
 
-    async registration(
+    async register(
         username: string,
         email: string,
         password: string,
@@ -53,7 +53,7 @@ export default class Store {
         role: string
     ) {
         try {
-            const response = await AuthService.registration(username, email, password, language, theme, role);
+            const response = await AuthService.register(username, email, password, language, theme, role);
             localStorage.setItem("token", response.data.accessToken);
             this.setAuth(true);
             this.setUser(response.data.user);
@@ -82,7 +82,7 @@ export default class Store {
         this.isLoading = true;
         this.isCheckedAuth = true;
         try {
-            const response = await axios.get<AuthResponse>(`${API_URL}/refresh`, { withCredentials: true });
+            const response = await $api.get(`/refresh`);
             localStorage.setItem("token", response.data.accessToken);
             this.setAuth(true);
             this.setUser(response.data.user);
@@ -135,15 +135,6 @@ export default class Store {
     }
 
     async getUsers() {
-        try {
-            const response = await UserService.fetchUsers();
-            console.log("Fetched users:", response.data);
-            this.setUsers(response.data);
-        } catch (e) {
-            console.error("Error fetching users:", e);
-        }
-    }
-    async updateUserBlockStatus() {
         try {
             const response = await UserService.fetchUsers();
             console.log("Fetched users:", response.data);
