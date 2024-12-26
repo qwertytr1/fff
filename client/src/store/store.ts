@@ -3,100 +3,154 @@ import { makeAutoObservable } from "mobx";
 import { IUser } from "../models/IUser";
 import { AuthResponse } from "../models/response/AuthResponce";
 import AuthService from "../services/AuthService";
-import $api, {API_URL} from "../http";
-import { IEditUser } from "../models/editUsers";
-import { RefreshResponse } from "../models/response/RefreshResponce";
+import $api, { API_URL } from "../http";
+import UserService from "../services/UserService";
+
 export default class Store {
-    user = {} as IUser;
+    user: Partial<IUser> = {}; // Используем Partial для необязательных полей
+    users: IUser[] = []; // Хранение списка пользователей
     isAuth = false;
     isLoading = false;
+    isCheckedAuth = false; // Новый флаг для отслеживания состояния проверки аутентификации
 
     constructor() {
-        makeAutoObservable(this)
+        makeAutoObservable(this);
     }
-    setAuth(bool: boolean) {
-        this.isAuth = bool;
+
+    setAuth(isAuth: boolean) {
+        this.isAuth = isAuth;
     }
+
     setUser(user: IUser) {
         this.user = user;
     }
-    setLoading(bool: boolean) {
-        this.isLoading = bool;
+
+    setUsers(users: IUser[]) {
+        this.users = users;
     }
+
+    setLoading(isLoading: boolean) {
+        this.isLoading = isLoading;
+    }
+
     async login(email: string, password: string) {
         try {
             const response = await AuthService.login(email, password);
-            console.log(response)
-            localStorage.setItem('token', response.data.userData.accessToken);
+            localStorage.setItem("token", response.data.accessToken);
             this.setAuth(true);
-            console.log("Stored token:", localStorage.getItem('token'));
-            this.setUser(response.data.userData.user);
+            this.setUser(response.data.user);
         } catch (e) {
-            console.log(e)
+            console.error("Login error:", e);
         }
     }
-    async registration(username: string, email: string, password: string, language: string, theme: string, role: string) {
+
+    async registration(
+        username: string,
+        email: string,
+        password: string,
+        language: string,
+        theme: string,
+        role: string
+    ) {
         try {
             const response = await AuthService.registration(username, email, password, language, theme, role);
-
-            localStorage.setItem('token', response.data.userData.accessToken);
+            localStorage.setItem("token", response.data.accessToken);
             this.setAuth(true);
-            this.setUser(response.data.userData.user);
+            this.setUser(response.data.user);
         } catch (e) {
             if (e instanceof Error) {
-                // e is narrowed to Error!
-                console.log(e.message);
+                console.error("Registration error:", e.message);
             }
         }
     }
+
     async logout() {
         try {
-            const response = await $api.post('/logout');
-            console.log(response);
-            localStorage.removeItem('token');
+            await $api.post("/logout");
+            localStorage.removeItem("token");
             this.setAuth(false);
             this.setUser({} as IUser);
-            console.log("Logout response:", response.data);
         } catch (e) {
             console.error("Logout error:", e);
         }
     }
-    async  checkAuth() {
-        this.setLoading(true); // Включаем загрузку
+
+
+    async checkAuth() {
+        if (this.isCheckedAuth) return;
+
+        this.isLoading = true;
+        this.isCheckedAuth = true;
         try {
-            console.log("[Auth] Sending refresh request...");
-            const response = await axios.get<RefreshResponse>(`${API_URL}/refresh`, {
-                withCredentials: true,
-            });
-
-            console.log("[Auth] Refresh response:", response.data);
-
-            // Сохраняем токен и обновляем состояние
+            const response = await axios.get<AuthResponse>(`${API_URL}/refresh`, { withCredentials: true });
             localStorage.setItem("token", response.data.accessToken);
             this.setAuth(true);
             this.setUser(response.data.user);
-
-            console.log("[Auth] Authentication successful");
-        } catch (e: any) {
-            console.error("[Auth] Authentication failed:", e.response?.data?.message || e.message);
-            this.setAuth(false);
+        } catch (e) {
+            console.error("Check auth error:", e);
         } finally {
-            this.setLoading(false); // Отключаем загрузку
+            this.isLoading = false;
+        }
+    }
+    async edit(
+        id: number,
+        userData: { username: string; email: string; password: string; language: string; theme: string; role: string }
+    ) {
+        try {
+            const response = await UserService.edit(id, userData);
+            if (response && response.data) {
+                this.setUser(response.data);
+                return response.data;
+            } else {
+                throw new Error("Invalid response structure from server");
+            }
+        } catch (e) {
+            console.error("Error in edit method:", e);
+            throw e;
         }
     }
 
-    async edit(id: number, userData: { username: string, email: string, password: string, language: string, theme: string, role: string }) {
+    async handleSaveChanges(formData: {
+        username: string;
+        email: string;
+        password: string;
+        language: string;
+        theme: string;
+    }) {
         try {
-          const response = await AuthService.edit(id, userData);
-          if (response.data) {
-            this.setUser(response.data);
-            return response.data;
-          } else {
-            throw new Error("Invalid response structure from server");
-          }
-        } catch (e) {
-          console.error("Error in edit method:", e);
-          throw e;
+            const userData = {
+                username: formData.username || this.user.username || "",
+                email: formData.email || this.user.email || "",
+                password: formData.password || "",
+                language: formData.language || this.user.language || "",
+                theme: formData.theme || this.user.theme || "",
+                role: this.user.role || "user",
+            };
+            const updatedUser = await this.edit(this.user.id!, userData); // Используем non-null assertion
+            this.setUser(updatedUser);
+        } catch (error) {
+            console.error("Error saving profile changes:", error);
+            alert("Failed to save changes. Please try again.");
         }
-      }
+    }
+
+    async getUsers() {
+        try {
+            const response = await UserService.fetchUsers();
+            console.log("Fetched users:", response.data);
+            this.setUsers(response.data);
+        } catch (e) {
+            console.error("Error fetching users:", e);
+        }
+    }
+    async updateUserBlockStatus() {
+        try {
+            const response = await UserService.fetchUsers();
+            console.log("Fetched users:", response.data);
+            this.setUsers(response.data);
+        } catch (e) {
+            console.error("Error fetching users:", e);
+        }
+    }
+
 }

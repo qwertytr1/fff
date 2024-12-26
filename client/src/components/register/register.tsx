@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { Typography, Form, Input, Button, Select, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import "./register.css";
@@ -26,10 +26,43 @@ function Register() {
   const [theme, setTheme] = useState<string>('');
   const [role, setRole] = useState<string>('');
   const { store } = useContext(Context);
+  const navigate = useNavigate();
 
-  const handleLanguageChange = (value: string) => setLanguage(value);
-  const handleThemeChange = (value: string) => setTheme(value);
-  const handleRoleChange = (value: string) => setRole(value);
+
+  const handleUsernameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.target.value);
+  }, []);
+
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  }, []);
+
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+  }, []);
+
+  const handleLanguageChange = useCallback((value: string) => {
+    setLanguage(value);
+  }, []);
+
+  const handleThemeChange = useCallback((value: string) => {
+    setTheme(value);
+  }, []);
+
+  const handleRoleChange = useCallback((value: string) => {
+    setRole(value);
+  }, []);
+
+
+  const handleRegister = useCallback(async () => {
+    try {
+      await store.registration(username, email, password, language, theme, role);
+      message.success("Registration successful");
+      navigate("/login");
+    } catch (error) {
+      message.error("Registration failed, please try again");
+    }
+  }, [username, email, password, language, theme, role, store, navigate]);
 
   return (
     <div className="register-container">
@@ -40,7 +73,7 @@ function Register() {
         <Text className="form-text">
           Create an account to get started.
         </Text>
-        <Form name="registerForm" layout="vertical">
+        <Form name="registerForm" layout="vertical" onFinish={handleRegister}>
           <Form.Item
             label="Username"
             name="username"
@@ -49,7 +82,7 @@ function Register() {
             <Input
               className="register-input"
               placeholder="Enter your username"
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={handleUsernameChange}
               value={username}
             />
           </Form.Item>
@@ -65,7 +98,7 @@ function Register() {
             <Input
               className="register-input"
               placeholder="Enter your email"
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               value={email}
             />
           </Form.Item>
@@ -78,7 +111,7 @@ function Register() {
             <Input.Password
               className="register-input"
               placeholder="Enter your password"
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
               value={password}
             />
           </Form.Item>
@@ -137,9 +170,6 @@ function Register() {
               type="primary"
               htmlType="submit"
               block
-              onClick={() =>
-                store.registration(username, email, password, language, theme, role)
-              }
             >
               Register
             </Button>

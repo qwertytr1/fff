@@ -1,144 +1,138 @@
+// src/pages/ProfilePage.tsx
 import React, { useContext, useState } from "react";
 import { observer } from "mobx-react-lite";
-import store from "../../store/store"
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./ProfilePage.css"; // Custom CSS for additional styling
+import { Button, Card, Form, Input, Typography, Descriptions, message } from "antd";
 import { Context } from "../..";
+import { IUser } from "../../models/IUser";
+import AdminPanel from "./AdminPanel";
+
+const { Title } = Typography;
 
 const ProfilePage = observer(() => {
-    const {store} = useContext(Context);
+  const { store } = useContext(Context);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    username: store.user.username,
-    email: store.user.email,
-    language: store.user.language,
-    theme: store.user.theme,
-  });
-console.log(formData)
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [users, setUsers] = useState<IUser[]>([]);
+
+  // Form management
+  const [form] = Form.useForm();
+  const initialValues = {
+    username: store.user.username || "",
+    email: store.user.email || "",
+    language: store.user.language || "",
+    theme: store.user.theme || "",
+    password: "",
+  };
+
   const handleEditProfile = () => {
     setIsEditing(true);
+    form.setFieldsValue(initialValues);
   };
-  const handleSaveChanges = async () => {
-    try {
-      const updatedFields: Partial<typeof formData> = {};
 
-      (Object.keys(formData) as Array<keyof typeof formData>).forEach((key) => {
-        if (formData[key] !== store.user[key]) {
-          updatedFields[key] = formData[key];
-        }
-      });
-
-      if (Object.keys(updatedFields).length > 0) {
-        const userData = {
-          username: formData.username ?? store.user.username ?? '',
-          email: formData.email ?? store.user.email ?? '',
-          password: "", // Пароль не меняется
-          language: formData.language ?? store.user.language ?? '',
-          theme: formData.theme ?? store.user.theme ?? '',
-          role: store.user.role ?? '',
-        };
-
-        const updatedUser = await store.edit(store.user.id, userData);
-        store.setUser(updatedUser);
-      } else {
-        alert("No changes detected.");
-      }
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error saving profile changes:", error);
-      alert("Failed to save changes. Please try again.");
-    }
-  };
   const handleCancelChanges = () => {
-    setFormData({
-      username: store.user.username,
-      email: store.user.email,
-      language: store.user.language,
-      theme: store.user.theme,
-    });
+    setIsEditing(false);
+    form.resetFields();
+  };
+
+  const handleSaveChanges = async (values: typeof initialValues) => {
+    await store.handleSaveChanges(values);
     setIsEditing(false);
   };
 
-  const handleChange = (e: { target: { name: any; value: any; }; }) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
   return (
-    <div className="profile-container container mt-5">
-      <div className="card shadow">
-        <div className="card-header text-center">
-          <h3 className="profile-title">Profile Page</h3>
-        </div>
-        <div className="card-body">
-          {isEditing ? (
-            <>
-              <div className="form-group">
-                <label>Username:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="form-group mt-2">
-                <label>Email:</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="form-group mt-2">
-                <label>Language:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="language"
-                  value={formData.language}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="form-group mt-2">
-                <label>Theme:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="theme"
-                  value={formData.theme}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="text-center mt-4">
-                <button className="btn btn-success me-2" onClick={handleSaveChanges}>Save</button>
-                <button className="btn btn-secondary" onClick={handleCancelChanges}>Cancel</button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p><strong>Username:</strong> {store.user.username}</p>
-              <p><strong>Email:</strong> {store.user.email}</p>
-              <p><strong>Language:</strong> {store.user.language}</p>
-              <p><strong>Theme:</strong> {store.user.theme}</p>
-              <p><strong>Role:</strong> {store.user.role}</p>
+    <div className="container mt-5">
+      <Card
+        bordered={false}
+        style={{
+          maxWidth: "600px",
+          margin: "0 auto",
+          boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+        }}
+      >
+        <Title level={3} className="text-center">Profile Page</Title>
 
-              <div className="text-center mt-4">
-                <button className="btn btn-primary" onClick={handleEditProfile}>Edit Profile</button>
-              </div>
-            </>
-          )}
+        {isEditing ? (
+          <Form
+            form={form}
+            layout="vertical"
+            initialValues={initialValues}
+            onFinish={handleSaveChanges}
+          >
+            <Form.Item
+              label="Username"
+              name="username"
+              rules={[{ required: true, message: "Please input your username!" }]}
+            >
+              <Input />
+            </Form.Item>
 
-          {store.user.role === "admin" && (
-            <div className="text-center mt-3">
-              <a href="/admin" className="btn btn-warning">Go to Admin Panel</a>
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[{ required: true, type: "email", message: "Please input a valid email!" }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              label="Language"
+              name="language"
+              rules={[{ required: true, message: "Please input your language!" }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              label="Theme"
+              name="theme"
+              rules={[{ required: true, message: "Please input your theme!" }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item label="Password" name="password">
+              <Input.Password />
+            </Form.Item>
+
+            <div className="text-center">
+              <Button type="primary" htmlType="submit" className="me-2">
+                Save
+              </Button>
+              <Button htmlType="button" onClick={handleCancelChanges}>
+                Cancel
+              </Button>
             </div>
-          )}
-        </div>
-      </div>
+          </Form>
+        ) : (
+          <>
+            <Descriptions bordered column={1} size="middle">
+              <Descriptions.Item label="Username">{store.user.username}</Descriptions.Item>
+              <Descriptions.Item label="Email">{store.user.email}</Descriptions.Item>
+              <Descriptions.Item label="Language">{store.user.language}</Descriptions.Item>
+              <Descriptions.Item label="Theme">{store.user.theme}</Descriptions.Item>
+              <Descriptions.Item label="Role">{store.user.role}</Descriptions.Item>
+            </Descriptions>
+            <div className="text-center mt-4">
+              <Button type="primary" onClick={handleEditProfile}>
+                Edit Profile
+              </Button>
+            </div>
+          </>
+        )}
+
+        {store.user.role === "admin" && (
+          <div className="text-center mt-4">
+            <Button
+              type="default"
+              onClick={() => setShowAdminPanel((prev) => !prev)}
+            >
+              {showAdminPanel ? "Hide Admin Panel" : "Show Admin Panel"}
+            </Button>
+          </div>
+        )}
+
+        {showAdminPanel && <AdminPanel users={users} setUsers={setUsers} />}
+      </Card>
     </div>
   );
 });

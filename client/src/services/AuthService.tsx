@@ -14,12 +14,4 @@ export default class AuthService {
     static async logout(): Promise<void> {
         return $api.post('/logout', { withCredentials: true })
     }
-    static async edit(
-        id: number,
-        userData: { username: string; email: string; password: string; language: string; theme: string; role: string }
-    ): Promise<AxiosResponse<IUser>> {
-        const response = await $api.put(`/user/${id}`, userData);
-        console.log("Server response:", response.data); // Логируем ответ от сервера
-        return response;
-    }
 }
